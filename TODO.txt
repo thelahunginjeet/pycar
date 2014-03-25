@@ -1,0 +1,20 @@
+TODO:
+
+raicar.py
+-better way to handle pass-through of ica parameters, rather than requiring all options be specified (**kwargs?)
+-fix inconsistent usage of '.' and 'getNode()' in pytables access
+-control of verbosity
+-modernize to match pyica package
+
+bicar.py
+-better function comments
+-profile
+-more symmetry in the alignDict; use alignDict['time'] and alignDict['space']? two variables?  time and space subdirs of aln?
+-alternate matching strategies
+-better way to set nSignals
+-replace 'import numpy as np' with import of specific functions 
+-logging
+-better way to wrap up all the parameters, including fastica options
+-replace stuff in statistics module with numpy/scipy equivalents
+-make reportLevel = 1 less verbose
+-MI estimate using KDE for p(x), p(y), p(x,y)
