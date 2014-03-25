@@ -1,5 +1,7 @@
 TODO:
 
+-setup.py to make distro/do install
+
 raicar.py
 -better way to handle pass-through of ica parameters, rather than requiring all options be specified (**kwargs?)
 -fix inconsistent usage of '.' and 'getNode()' in pytables access
