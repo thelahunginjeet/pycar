@@ -2,24 +2,27 @@ Author : Kevin S. Brown (kevin.s.brown@uconn.edu, github.com/thelahunginjeet)
 
 A python package that contains implementations of the following algorithms:
 
-RAICAR : See Z. Yang, S. LaConte, X. Weng, and X. Hu, Human Brain Mapping 29: 711-725 (2008) for the original RAICAR algorithm and 
-Brown, Grafton, and Carlson, PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219: 205-219 (2013) for 
-the modifications I have made.
+RAICAR : See Z. Yang, S. LaConte, X. Weng, and X. Hu, Human Brain Mapping 29: 711-725 (2008) for the original RAICAR algorithm and Brown, Grafton, and Carlson, 
+PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219: 205-219 (2013) for the modifications I have made.
 
-BICAR : Brown, Grafton, Carlson, PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219: 205-219 (2013) for 
-details of the BICAR algorithm.
+BICAR : Brown, Grafton, Carlson, PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219: 205-219 (2013) for details of the BICAR algorithm.
 
-Both RAICAR and BICAR need an external module to run Independent Component Analysis.  They currently use my pyica package, also 
-available on github.
+Both RAICAR and BICAR need an external module to run Independent Component Analysis.  They currently use my pyica package, also available on github.
 
-BICAR is significantly more complicated than RAICAR, given that it attempts to find joint reproducible sources in two datasets.  For a
-'quick start' in RAICAR:
+BICAR is significantly more complicated than RAICAR, given that it attempts to find joint reproducible sources in two datasets.  For a 'quick start' in RAICAR:
 
 >>import raicar
 >>raicar = RAICAR(projDirectory='scratch')
 >>raciar.clean_project()
 >>raicar.runall(X)
 
-X should be a matrix of size Nmixtures x Nsamples, where (ideally) Nsamples >> Nmixtures.  See the documentation on BICAR and RAICAR for
-full details.
+For quick tests to see if things are working, move into the tests directory and either run:
+
+~>py.test test_raicar_pytest.py
+
+or for the standalone testing script:
+
+~>python runtests.py
+
+X should be a matrix of size Nmixtures x Nsamples, where (ideally) Nsamples >> Nmixtures.  See the documentation on BICAR and RAICAR for full details.
 
