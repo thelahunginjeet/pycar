@@ -28,7 +28,7 @@ class TestRAICAR:
         # RAICAR object
         self.K = 10
         # data logger
-        self.logger = Logger('raicartest/runlog.txt')
+        self.logger = Logger('runlog.txt')
         # raicar object
         self.mycar = RAICAR(projDirectory='raicartest',K=self.K,nSignals=3,icaOptions=icaOptions)
 
