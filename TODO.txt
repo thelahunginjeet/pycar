@@ -9,6 +9,7 @@ raicar.py
 -modernize to match pyica package
 
 bicar.py
+-FIX corrmatrix thing and ICA
 -better function comments
 -profile
 -more symmetry in the alignDict; use alignDict['time'] and alignDict['space']? two variables?  time and space subdirs of aln?
