@@ -1,6 +1,6 @@
-from raicar import RAICAR
-from runlogger import Logger
-from utilities import standardize
+from pycar.raicar import RAICAR
+from pycar.runlogger import Logger
+from pycar.utilities import standardize
 import numpy as np
 import glob,cPickle
 
