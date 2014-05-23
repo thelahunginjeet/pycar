@@ -23,6 +23,7 @@ setup(name='pycar',
       packages=['pycar'],
       package_dir={'pycar': ''},
       package_data={'pycar' : ['tests/runtests.py','tests/test_raicar_pytest.py','tests/data/icatestsignals.db']},
+      cmdclass = {'test': PyTest},
       license='BSD-3',
       classifiers = [
           'License :: OSI Approved :: BSD-3 License',

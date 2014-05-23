@@ -7,7 +7,7 @@ import glob,cPickle
 class TestRAICARrpy2ica:
     
     def setup(self):
-        filePtr = open('data/icatestsignals.db','r')
+        filePtr = open('tests/icatestsignals.db','r')
         signalDict = cPickle.load(filePtr)
         filePtr.close()
         # setup the test data
@@ -32,9 +32,9 @@ class TestRAICARrpy2ica:
         # RAICAR object
         self.K = 10
         # data logger
-        self.logger = Logger('runlog.txt')
+        self.logger = Logger('tests/runlog.txt')
         # raicar object
-        self.mycar = RAICAR(projDirectory='raicartest',K=self.K,nSignals=3,icaOptions=icaOptions,icaMethod=icaMethod)
+        self.mycar = RAICAR(projDirectory='tests/raicartest',K=self.K,nSignals=3,icaOptions=icaOptions,icaMethod=icaMethod)
 
 
     def test_has_ica(self):
@@ -48,14 +48,14 @@ class TestRAICARrpy2ica:
     
     def test_clean_project(self):
         self.mycar.clean_project()
-        assert len(glob.glob('raicartest/ica/*.h5')) == 0,"project not cleaned succesfully: aligned components exist"
-        assert len(glob.glob('raicartest/aln/*.aln')) == 0,"project not cleaned successfully: ica realizations exist"
-        assert len(glob.glob('raicartest/rab/*.db')) == 0,"project not cleaned successfully: R(a,b) matrices exist"
+        assert len(glob.glob('tests/raicartest/ica/*.h5')) == 0,"project not cleaned succesfully: aligned components exist"
+        assert len(glob.glob('tests/raicartest/aln/*.aln')) == 0,"project not cleaned successfully: ica realizations exist"
+        assert len(glob.glob('tests/raicartest/rab/*.db')) == 0,"project not cleaned successfully: R(a,b) matrices exist"
     
 
     def test_run_ica(self):
         self.mycar.kica(self.X)
-        assert len(glob.glob('raicartest/ica/*.h5')) == self.K,"ica failed: proper number of realizations not produced"
+        assert len(glob.glob('tests/raicartest/ica/*.h5')) == self.K,"ica failed: proper number of realizations not produced"
 
     
     def test_compute_rab(self):
@@ -88,8 +88,8 @@ class TestRAICARrpy2ica:
         self.mycar.compute_component_alignments()
         for k in xrange(3):
             self.mycar.align_component(k)
-        assert len(glob.glob('raicartest/aln/*.h5')) == 3,"problem with aligned components: not enough components"
-        assert len(glob.glob('raicartest/aln/*.db')) == 1,"problem with aligned components: alignment database was not created"
+        assert len(glob.glob('tests/raicartest/aln/*.h5')) == 3,"problem with aligned components: not enough components"
+        assert len(glob.glob('tests/raicartest/aln/*.db')) == 1,"problem with aligned components: alignment database was not created"
 
     def test_construct_raicar_components(self):
         self.mycar.kica(self.X)
@@ -105,7 +105,7 @@ class TestRAICARrpy2ica:
 class TestRAICARpyica:
 
     def setup(self):
-        filePtr = open('data/icatestsignals.db','r')
+        filePtr = open('tests/icatestsignals.db','r')
         signalDict = cPickle.load(filePtr)
         filePtr.close()
         # setup the test data
@@ -133,9 +133,9 @@ class TestRAICARpyica:
         # RAICAR object
         self.K = 10
         # data logger
-        self.logger = Logger('runlog.txt')
+        self.logger = Logger('tests/runlog.txt')
         # raicar object
-        self.mycar = RAICAR(projDirectory='raicartest',K=self.K,nSignals=3,icaOptions=icaOptions,icaMethod=icaMethod)
+        self.mycar = RAICAR(projDirectory='tests/raicartest',K=self.K,nSignals=3,icaOptions=icaOptions,icaMethod=icaMethod)
 
 
     def test_has_ica(self):
@@ -149,14 +149,14 @@ class TestRAICARpyica:
     
     def test_clean_project(self):
         self.mycar.clean_project()
-        assert len(glob.glob('raicartest/ica/*.h5')) == 0,"project not cleaned succesfully: aligned components exist"
-        assert len(glob.glob('raicartest/aln/*.aln')) == 0,"project not cleaned successfully: ica realizations exist"
-        assert len(glob.glob('raicartest/rab/*.db')) == 0,"project not cleaned successfully: R(a,b) matrices exist"
+        assert len(glob.glob('tests/raicartest/ica/*.h5')) == 0,"project not cleaned succesfully: aligned components exist"
+        assert len(glob.glob('tests/raicartest/aln/*.aln')) == 0,"project not cleaned successfully: ica realizations exist"
+        assert len(glob.glob('tests/raicartest/rab/*.db')) == 0,"project not cleaned successfully: R(a,b) matrices exist"
     
 
     def test_run_ica(self):
         self.mycar.kica(self.X)
-        assert len(glob.glob('raicartest/ica/*.h5')) == self.K,"ica failed: proper number of realizations not produced"
+        assert len(glob.glob('tests/raicartest/ica/*.h5')) == self.K,"ica failed: proper number of realizations not produced"
 
     
     def test_compute_rab(self):
@@ -189,8 +189,8 @@ class TestRAICARpyica:
         self.mycar.compute_component_alignments()
         for k in xrange(3):
             self.mycar.align_component(k)
-        assert len(glob.glob('raicartest/aln/*.h5')) == 3,"problem with aligned components: not enough components"
-        assert len(glob.glob('raicartest/aln/*.db')) == 1,"problem with aligned components: alignment database was not created"
+        assert len(glob.glob('tests/raicartest/aln/*.h5')) == 3,"problem with aligned components: not enough components"
+        assert len(glob.glob('tests/raicartest/aln/*.db')) == 1,"problem with aligned components: alignment database was not created"
 
     def test_construct_raicar_components(self):
         self.mycar.kica(self.X)
