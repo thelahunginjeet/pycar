@@ -3,13 +3,12 @@ TODO:
 -setup.py to make distro/do install
 
 raicar.py
--better way to handle pass-through of ica parameters, rather than requiring all options be specified (**kwargs?)
 -fix inconsistent usage of '.' and 'getNode()' in pytables access
 -control of verbosity
 -modernize to match pyica package
 
 bicar.py
--FIX corrmatrix thing and ICA
+-FIX corrmatrix thing for Rab computation
 -better function comments
 -profile
 -more symmetry in the alignDict; use alignDict['time'] and alignDict['space']? two variables?  time and space subdirs of aln?

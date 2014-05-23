@@ -162,8 +162,8 @@ class BICARTransferFunction(object):
         
 
 class BICAR(RAICAR):
-    def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaOptions=None,reportLevel=2):
-        super(BICAR,self).__init__(projDirectory,nSignals,K,avgMethod,canonSigns,icaOptions)
+    def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaMethod=None,icaOptions=None,reportLevel=2):
+        super(BICAR,self).__init__(projDirectory,nSignals,K,avgMethod,canonSigns,icaMethod,icaOptions)
         # BICAR-specific member data
         self.projDirectory = projDirectory
         self.temporalDirectory = os.path.join(self.projDirectory,'tICA')  # tICA realizations
@@ -269,11 +269,8 @@ class BICAR(RAICAR):
             if not os.path.exists(f):
                 if self.reportLevel > 0:
                     print 'Running %s ICA realization %s' % (icaType,f)
-                if self.icaOptions['algorithm'] == 'rpy':
-                    A,W,S = rpyica.fastica_rpy(X,nSources=self.nSignals,nonlinearity=self.icaOptions['nonlinearity'],maxIterations=self.icaOptions['maxIterations'],tolerance=self.icaOptions['tolerance'])
-                else:
-                    A,W,S = fastica.fastica(X,nSources=self.nSignals,algorithm=self.icaOptions['algorithm'],decorrelation=self.icaOptions['decorrelation'],
-                                            nonlinearity=self.icaOptions['nonlinearity'],alpha=self.icaOptions['alpha'],maxIterations=self.icaOptions['maxIterations'],tolerance=self.icaOptions['tolerance'])
+                A,W,S = self.ica(X,nSources=self.nSignals,**self.icaOptions)
+                # write the results to hdf5
                 h5Ptr = tb.openFile(f,mode="w",title='ICA Realization')
                 decomp = h5Ptr.createGroup(h5Ptr.root,'decomps','ICA Decomposition')
                 h5Ptr.createArray(decomp,'sources',S,"S")
