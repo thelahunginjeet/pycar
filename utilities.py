@@ -55,6 +55,16 @@ def standardize(X,stdtype='column'):
 	    F = F.T
 	return F
 
+def corrmatrix(X,Y):
+    """For two data matrices X (M x T) and Y (N x T), corrmatrix(X,Y) computes the M x N set of pearson correlation 
+    coefficients between all the rows of X and the rows of Y.  X and Y must have the same column dimension for
+    this to work."""
+    assert X.shape[1] == Y.shape[1]
+    # row standardize X and Y
+    X = (X - X.mean(axis=1)[:,np.newaxis])/X.std(axis=1)[:,np.newaxis]
+    Y = (Y - Y.mean(axis=1)[:,np.newaxis])/Y.std(axis=1)[:,np.newaxis]
+    return np.dot(X,Y.T)/X.shape[1]
+
 def deconstruct_file_name(name):
     """Simple function to break apart a file name into individual pieces without the extension"""
     return path.splitext(path.split(name)[1])[0].split('_')

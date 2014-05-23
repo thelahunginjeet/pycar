@@ -39,9 +39,7 @@ import tables as tb
 import numpy as np
 import glob,unittest,cPickle,sys,os,gc
 
-from pyica import fastica as ica
-from pyica import rpyica as rica
-from utilities import standardize, construct_file_name, deconstruct_file_name
+from utilities import standardize, corrmatrix, construct_file_name, deconstruct_file_name
 from runlogger import Logger
 
 from scipy import corrcoef,histogram
@@ -109,7 +107,7 @@ class RAICAR(object):
 
     '''
     @log_function_call('Initializing') 
-    def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaOptions=None):
+    def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaMethod=None,icaOptions=None):
         '''
         Parameters:
         ------------
@@ -129,17 +127,24 @@ class RAICAR(object):
             K : int, optional
                 number of ICA realizations
             
-            icaMethod : string, optional
-                which flavor of ICA to run? check pyica for supported methods
-            
             avgMethod : string, optional
                 'selective' or 'weighted' : which type of component averaging to use
                 
             canonSigns : bool, optional
                 perform sign canonicalization?
+
+            
+            icaMethod : function, optional
+                a function to use for fastICA decompositions. if icaMethod=None, RAICAR will try to use
+                fastica from the pyica package.  If you supply your own function, it should follow the
+                return convention described in the README file.  The method calling sequence can be
+                f(X,nSources,...), where X is the data matrix,nSources is the requested number of sources
+                , and then any number of keyword arguments follow; icaOptions specifies necessary keyword 
+                arguments
+
                 
             icaOptions : dict, optional
-                arguments to pass to fastICA
+                arguments to pass to fastICA; defaults correspond to kwargs in pyica.fastica
                     -algorithm: string
                     -decorrelation : string
                     -nonlinearity : string
@@ -177,6 +182,11 @@ class RAICAR(object):
             self.icaOptions['tolerance'] = 1.0e-05
         else:
             self.icaOptions = icaOptions
+        if icaMethod is None:
+            from pyica import fastica
+            self.ica = fastica
+        else:
+            self.ica = icaMethod
         
         
     def find_max_elem(self):
@@ -336,7 +346,7 @@ class RAICAR(object):
     @log_function_call('Running K-fold ICA')    
     def kica(self,X):
         '''
-        Runs K realizations of ICA (method given by constructor argument kICA), decomposing data matrix X
+        Runs K realizations of ICA (method dictated by constructor argument icaMethod), decomposing data matrix X
         into A*S, for sources S and mixing matrix A.  Resulting realizations are stored in a PyTable in 
         the /ica directory.
         '''
@@ -353,11 +363,7 @@ class RAICAR(object):
         for icaFile in icaToMake:
             if not os.path.exists(icaFile):
                 print 'Running ICA realization %s' % icaFile
-                if self.icaOptions['algorithm'] == 'rpy':
-                    A,W,S = rica(X,nSources=self.nSignals,nonlinearity=self.icaOptions['nonlinearity'],maxIterations=self.icaOptions['maxIterations'],tolerance=self.icaOptions['tolerance'])
-                else:
-                    A,W,S = ica(X,nSources=self.nSignals,algorithm=self.icaOptions['algorithm'],decorrelation=self.icaOptions['decorrelation'],
-                                            nonlinearity=self.icaOptions['nonlinearity'],alpha=self.icaOptions['alpha'],maxIterations=self.icaOptions['maxIterations'],tolerance=self.icaOptions['tolerance'])
+                A,W,S = self.ica(X,nSources=self.nSignals,**self.icaOptions)
                 # write the results to a PyTable
                 h5Ptr = tb.openFile(icaFile,mode="w",title='ICA Realization')
                 decomps = h5Ptr.createGroup(h5Ptr.root,'decomps','ICA Decompositions')
@@ -396,11 +402,7 @@ class RAICAR(object):
                     fjPtr = tb.openFile(os.path.join(self.icaDirectory,fj),'r')
                     sj = fjPtr.getNode('/decomps/sources').read()
                     fjPtr.close()
-                    # break up a complex line
-                    siMean = np.reshape(si.mean(axis=1),(si.shape[0],1))
-                    sjMean = np.reshape(sj.mean(axis=1),(sj.shape[0],1))
-                    self.RabDict[(i,j)] = np.abs((1.0/si.shape[1])*np.dot(si,sj.T) - np.dot(siMean,sjMean.T))
-                    #self.RabDict[(i,j)] = (1.0/si.shape[1])*np.abs(np.dot(si,sj.T))
+                    self.RabDict[(i,j)] = np.abs(corrmatrix(si,sj))
         # pickle the result
         rabPtr = open(os.path.join(self.rabDirectory,'rabmatrix.db'),'wb')
         cPickle.dump(self.RabDict,rabPtr,protocol=-1)

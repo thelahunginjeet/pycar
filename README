@@ -7,7 +7,11 @@ PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219:
 
 BICAR : Brown, Grafton, Carlson, PLoS ONE 7: e50268 (2012) and Brown et al., Journal of Neuroscience Methods 219: 205-219 (2013) for details of the BICAR algorithm.
 
-Both RAICAR and BICAR need an external module to run Independent Component Analysis.  They currently use my pyica package, also available on github.
+Both RAICAR and BICAR need an external module to run Independent Component Analysis.  They have been written with my pyica and rpy2ica packages in mind (also available on github), but this is not necessary.  RAICAR/BICAR have constructor arguments icaMethod and icaOptions.  icaMethod should be a function to run ICA that has the call signature:
+
+	A,W,S = my_ica_function(X,nSources,**kwargs)
+
+A is the mixing matrix, W the unmixing matrix, and S the sources.  If you don't return the tuple this way, RAICAR/BICAR will fail.  The additional keyword arguments can be anything; they are simply passed along.  The default behavior is to use pyica.fastica with "sensible" options.
 
 BICAR is significantly more complicated than RAICAR, given that it attempts to find joint reproducible sources in two datasets.  For a 'quick start' in RAICAR:
 

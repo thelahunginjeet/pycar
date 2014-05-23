@@ -2,6 +2,18 @@
 
 from distutils.core import setup,Command
 
+class PyTest(Command):
+    user_options =[]
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call([sys.executable,'tests/runtests.py'])
+        raise SystemExit(errno)
+
+
 setup(name='pycar',
       version='1.0',
       description='Python package for the RAICAR and BICAR algorithms',
