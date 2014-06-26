@@ -174,7 +174,7 @@ class RAICAR(object):
         self.raicarMixing = None
         if icaOptions is None:
             self.icaOptions = dict()
-            self.icaOptions['algorithm'] = 'rpy'
+            self.icaOptions['algorithm'] = 'parallel fp'
             self.icaOptions['decorrelation'] = 'mdum'
             self.icaOptions['nonlinearity'] = 'logcosh'
             self.icaOptions['alpha'] = 1.0
