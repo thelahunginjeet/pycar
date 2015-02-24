@@ -23,7 +23,7 @@ For a 'quick start' in RAICAR (using fastica from pyica):
 
 X should be a matrix of size Nmixtures x Nsamples, where (ideally) Nsamples >> Nmixtures.  See the documentation on BICAR and RAICAR for full details.
 
-BICAR is significantly more complicated that RAICAR.  Along with the two data matrices, information relating the sampling rates of the two data modalities must be supplied to BICAR, along with an assumed transfer function.  See tests/test_bicar_pytest.py for an example of how to set up a BICAR run.
+BICAR is significantly more complicated that RAICAR.  Along with the two data matrices, information relating the sampling rates of the two data modalities must be supplied to BICAR, as well as an assumed LTI transfer function (via the BICARTransferFunction object).  See tests/test_bicar_pytest.py for an example of how to set up a BICAR run.
 
 For quick tests to see if things are working, run
 
