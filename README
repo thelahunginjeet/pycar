@@ -13,19 +13,21 @@ Both RAICAR and BICAR need an external module to run Independent Component Analy
 
 A is the mixing matrix, W the unmixing matrix, and S the sources.  If you don't return the tuple this way, RAICAR/BICAR will fail.  The additional keyword arguments can be anything; they are simply passed along.  The default behavior is to use pyica.fastica with "sensible" options.
 
+For a 'quick start' in RAICAR (using fastica from pyica):
 
-
-BICAR is significantly more complicated than RAICAR, given that it attempts to find joint reproducible sources in two datasets.  For a 'quick start' in RAICAR:
-
->>import raicar
->>raicar = RAICAR(projDirectory='scratch')
->>raciar.clean_project()
+>>from pycar.raicar import RAICAR
+>>from pyica import fastica 
+>>raicar = RAICAR(projDirectory='scratch',icaMethod=fastica)
+>>raicar.clean_project()
 >>raicar.runall(X)
 
 X should be a matrix of size Nmixtures x Nsamples, where (ideally) Nsamples >> Nmixtures.  See the documentation on BICAR and RAICAR for full details.
+
+BICAR is significantly more complicated that RAICAR.  Along with the two data matrices, information relating the sampling rates of the two data modalities must be supplied to BICAR, along with an assumed transfer function.  See tests/test_bicar_pytest.py for an example of how to set up a BICAR run.
 
 For quick tests to see if things are working, run
 
 ~>python setup.py test
 
 The tests will fail if run manually from within tests/, since the relative paths are not correct.
+
