@@ -48,8 +48,6 @@ from scipy.stats import pearsonr,spearmanr,kendalltau
 
 # other pycar dependencies
 from raicar import *
-from pyica import fastica
-from pyica import rpyica
 from utilities import empirical_ci, standardize, corrmatrix, construct_file_name, deconstruct_file_name
 
 # for mi calculation, if you want to pair sources that way
