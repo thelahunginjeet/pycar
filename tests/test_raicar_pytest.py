@@ -124,7 +124,6 @@ class TestRAICARpyica:
         icaOptions['tolerance'] = 1.0e-05
         icaOptions['alpha'] = 1.0
         # this is just to get the setup to run; test_has_ica will fail if pyica.fastica isn't there
-
         try:
             from pyica import fastica
             icaMethod = fastica
