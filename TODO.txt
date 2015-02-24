@@ -1,7 +1,5 @@
 TODO:
 
--setup.py to make distro/do install
-
 raicar.py
 -fix inconsistent usage of '.' and 'getNode()' in pytables access
 -control of verbosity
