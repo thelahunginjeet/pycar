@@ -15,7 +15,7 @@ class PyTest(Command):
 
 
 setup(name='pycar',
-      version='1.0',
+      version='0.1.0',
       description='Python package for the RAICAR and BICAR algorithms',
       author='Kevin Brown',
       author_email='kevin.s.brown@uconn.edu',
