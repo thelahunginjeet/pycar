@@ -515,7 +515,7 @@ class RAICAR(object):
         alignedMixing = np.vstack(mixColsToAlign).T
         fileName = os.path.join(self.alnDirectory,construct_file_name('alnRun',k,'h5'))
         h5Ptr = tb.open_file(fileName,mode="w",title='Aligned Component')
-        aligned = h5Ptr.createGroup(h5Ptr.root,'aligned','Aligned Component')
+        aligned = h5Ptr.create_group(h5Ptr.root,'aligned','Aligned Component')
         h5Ptr.create_array(aligned,'sources',alignedSources,"S")
         h5Ptr.create_array(aligned,'mixing',alignedMixing,"A")
         h5Ptr.close()
@@ -561,7 +561,7 @@ class RAICAR(object):
         self.raicarSources = standardize(self.raicarSources,stdtype='row')
         # save the result, PyTables again
         h5Ptr = tb.open_file(os.path.join(self.racDirectory,'components.h5'),mode="w",title='RAICAR Component')
-        raicar = h5Ptr.createGroup(h5Ptr.root,'raicar','RAICAR Component')
+        raicar = h5Ptr.create_group(h5Ptr.root,'raicar','RAICAR Component')
         h5Ptr.create_array(raicar,'sources',self.raicarSources,"S")
         h5Ptr.create_array(raicar,'mixing',self.raicarMixing,"A")
         h5Ptr.close()
