@@ -11,27 +11,27 @@ This source code is provided under the BSD-3 license, duplicated as follows:
 Copyright (c) 2013, Kevin S. Brown
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this 
+1. Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, this 
-list of conditions and the following disclaimer in the documentation and/or other 
+2. Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
 materials provided with the distribution.
 
-3. Neither the name of the University of Connecticut  nor the names of its contributors 
-may be used to endorse or promote products derived from this software without specific 
+3. Neither the name of the University of Connecticut  nor the names of its contributors
+may be used to endorse or promote products derived from this software without specific
 prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
@@ -55,7 +55,7 @@ class RAICARICAException(Exception):
 class RAICARRabException(Exception):
     def __init__(self):
         print "R(a,b) matrices have not been computed.  Run compute_rab() first."
-        
+
 class RAICARAlignmentException(Exception):
     def __init__(self):
         print "No alignment information has been determined.  Run compute_component_alignments() first."
@@ -63,50 +63,50 @@ class RAICARAlignmentException(Exception):
 class RAICARComponentException(Exception):
     def __init__(self):
         print "No RAICAR components have been calculated yet."
-        
+
 class RAICARDirectoryIOException(Exception):
     def __init__(self):
         print "There is a problem with your input project directory.  Check the path name."
-        
+
 class RAICARProjectCleanException(Exception):
     def __init__(self,dir):
         print "Nothing to clean: directory %s does not exist" % dir
-        
+
 class RAICARDirectoryExistException(Exception):
     def __init__(self,dir):
         print "Project subdirectory %s does not exist" % dir
 
 
 class RAICAR(object):
-    ''' 
+    '''
     This is a python implementation of RAICAR (Ranking and Averaging Independent Components by Reproducibility).
     I have modified the originally published algorithm in the following way:
-        
-        -I define the reproducibility index as the sum over *all* correlation coefficients (absolute value), 
+
+        -I define the reproducibility index as the sum over *all* correlation coefficients (absolute value),
         rather than using a sum of only those absolute correlations larger than a certain value.
-        
+
         -I make a weighted average of the realization components, using the average absolute correlation.
-        
-        -I attempt to canonicalize the signs of the grouped components; I find with many applications of ICA 
-        the signs of components will be all over the place; I attempt to fix the signs to agree with the 
+
+        -I attempt to canonicalize the signs of the grouped components; I find with many applications of ICA
+        the signs of components will be all over the place; I attempt to fix the signs to agree with the
         (arbitrary) sign of the first component added to each pile.
-   
+
     To run the published version of RAICAR, use the following constructor arguments:
         avgMethod = 'selective', canonSigns = False
-    
+
     To run the fully updated version, use these:
         avgMethod = 'weighted', canonSigns = True
-    
-    References : 
-        
+
+    References :
+
         "Ranking and Averaging Independent Component Analysis by Reproducibility (RAICAR)"
         Z. Yang, S. LaConte, X. Weng, and X. Hu, Human Brain Mapping 29:711-725 (2008).
 
-        "BICAR : A New Algorithm for Multiresolution Spatiotemporal Data Fusion" 
+        "BICAR : A New Algorithm for Multiresolution Spatiotemporal Data Fusion"
         K. Brown, S. Grafton, J. Carlson, PLoS ONE 7: e50268 (2012).
 
     '''
-    @log_function_call('Initializing') 
+    @log_function_call('Initializing')
     def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaMethod=None,icaOptions=None):
         '''
         Parameters:
@@ -115,34 +115,34 @@ class RAICAR(object):
                 main directory for the project (storage of ICA realizations, etc.).  Will be
                 created if it does not already exist.  Location of:
                     ->./ica : ica realizations
-                    ->./rab : dictionary of realization cross-correlation matrices, used to 
+                    ->./rab : dictionary of realization cross-correlation matrices, used to
                                 align components and compute reproducibility
-                    ->./aln : dictionary of component assignments, and aligned components 
+                    ->./aln : dictionary of component assignments, and aligned components
                                 (before averaging)
                     ->./rac : final set of averaged components and their reproducibility indices
 
             nSignals : int, optional
                 number of signals to extract; default is a full-rank decomposition
-        
+
             K : int, optional
                 number of ICA realizations
-            
+
             avgMethod : string, optional
                 'selective' or 'weighted' : which type of component averaging to use
-                
+
             canonSigns : bool, optional
                 perform sign canonicalization?
 
-            
+
             icaMethod : function, optional
                 a function to use for fastICA decompositions. if icaMethod=None, RAICAR will try to use
                 fastica from the pyica package.  If you supply your own function, it should follow the
                 return convention described in the README file.  The method calling sequence can be
                 f(X,nSources,...), where X is the data matrix,nSources is the requested number of sources
-                , and then any number of keyword arguments follow; icaOptions specifies necessary keyword 
+                , and then any number of keyword arguments follow; icaOptions specifies necessary keyword
                 arguments
 
-                
+
             icaOptions : dict, optional
                 arguments to pass to fastICA; defaults correspond to kwargs in pyica.fastica
                     -algorithm: string
@@ -166,8 +166,8 @@ class RAICAR(object):
         self.nSignals = nSignals
         # tuple-indexed list of K*(K-1)/2 cross-correlation matrices from K realizations of ICA
         self.RabDict = dict()
-        # alignment information for ICS; 
-        #    alignDict[j] = [c0,c1,...,cK-1] 
+        # alignment information for ICS;
+        #    alignDict[j] = [c0,c1,...,cK-1]
         self.alignDict = {}
         # will hold the eventual raicar sources/mixing matrices
         self.raicarSources = None
@@ -187,8 +187,8 @@ class RAICAR(object):
             self.ica = fastica
         else:
             self.ica = icaMethod
-        
-        
+
+
     def find_max_elem(self):
         '''
         Searches the list of realization-realization cross correlation matrices to find the single largest element;
@@ -199,12 +199,12 @@ class RAICAR(object):
         # maximum of the maxima
         bigIndx = np.argmax(zip(*matrixMax)[1])
         return matrixMax[bigIndx]
-    
+
 
     def search_realizations(self,rzIndx,compIndx):
         '''
         Accepts an (a,b) tuple of realizations (rzIndx) and an (m,n) tuple of component indices (compIndx) and
-        searches all the other K-2 realizations for components to match with C_am and C_bn.  Each run of 
+        searches all the other K-2 realizations for components to match with C_am and C_bn.  Each run of
         search_realizations() returns a tuple of ints toAlign = (c0,c1,...,cK-1) which gives
         components to group - c0 goes with realization 0, etc.
         '''
@@ -235,8 +235,8 @@ class RAICAR(object):
             toAlign.append((r,whichComp))
         toAlign.sort()
         return list(zip(*toAlign)[1])
-    
-    
+
+
     def reduce_rab(self,toAlign):
         '''
         Deletes a single row and column from each of the Rab matrices.
@@ -246,11 +246,11 @@ class RAICAR(object):
                 rz = (r1,r2)
                 rcDel = (toAlign[r1],toAlign[r2])
                 self.RabDict[rz] = np.delete(np.delete(self.RabDict[rz],rcDel[0],0),rcDel[1],1)
-    
-    
+
+
     def correct_alignment(self):
         '''
-        During the course of the algorithm, row/col deletion in R(a,b) causes alignment indices to be relative 
+        During the course of the algorithm, row/col deletion in R(a,b) causes alignment indices to be relative
         and not absolute - for example, the last component has indices [0,0,...,0], since at that step only
         one element is left in each realization matrix.  This function restores actual index numbers to the
         alignment.
@@ -262,9 +262,9 @@ class RAICAR(object):
         for k in range(0,self.K):
             newIndexSet.append(self.index_remap((np.asarray(self.alignDict.values())[:,k]).tolist()))
         for k in self.alignDict:
-            self.alignDict[k] = ((np.asarray(newIndexSet).T)[k,:]).tolist()          
-    
-        
+            self.alignDict[k] = ((np.asarray(newIndexSet).T)[k,:]).tolist()
+
+
     def index_remap(self,indToRemap):
         '''
         Remaps one set of indices from a complete decimation from relative to absolute indices - necessary
@@ -283,14 +283,14 @@ class RAICAR(object):
                 temp_remap = i_r[k][temp_remap]
             remappedIndex[posToRemap] = temp_remap
         return remappedIndex
-    
-    @log_function_call('Canonicalizing signs') 
+
+    @log_function_call('Canonicalizing signs')
     def canonicalize_signs(self,sources,mixing):
         '''
-        Accepts an set of sources and corresponding mixing matrices from an ICA component (should be a realization component, 
+        Accepts an set of sources and corresponding mixing matrices from an ICA component (should be a realization component,
         as this operation makes no sense for regular ICA realizations) and fixes the signs of the realizations, using the sign
-        of the inter-source cross correlations.  Specifically, the 0th source is arbitrarily deemed to have the canonical sign; 
-        components which correlate positively with this component keep the same signs, and those which negatively correlate 
+        of the inter-source cross correlations.  Specifically, the 0th source is arbitrarily deemed to have the canonical sign;
+        components which correlate positively with this component keep the same signs, and those which negatively correlate
         have their signs reversed.  This WILL NOT ensure all source-source correlations are positive, but will tend to cause
         the 'well matched' components to have the same sign.
         '''
@@ -299,12 +299,12 @@ class RAICAR(object):
             sources[i,:] = compSigns[i]*sources[i,:]
             mixing[:,i] = compSigns[i]*mixing[:,i]
         return sources,mixing
-    
+
     @log_function_call('Selectively averaging aligned components')
     def selective_average_aligned_runs(self,sources,mixing):
         '''
-        Averages one aligned ICA run and calculates a reproducibility index.  This version uses the original 
-        definition in Yang et al. 
+        Averages one aligned ICA run and calculates a reproducibility index.  This version uses the original
+        definition in Yang et al.
         '''
         # threshold for inclusion
         thresh = 0.7
@@ -315,22 +315,22 @@ class RAICAR(object):
         #    cross-correlation (namely self-correlation) which is bigger than 1
         toInclude = ((np.abs(corrcoef(sources)) > thresh).sum(axis=0) > 1)
         return sources[toInclude,:].mean(axis=0),mixing[:,toInclude].mean(axis=1),rep
-    
+
     @log_function_call('Weighted averaging aligned components')
     def weighted_average_aligned_runs(self,sources,mixing):
         '''
         Averages one aligned ICA run and calculates the reproducibility for each component.  This version does not
-        add only super-threshold CCs to the reproducibililty index, and it uses a weighted average to form the 
+        add only super-threshold CCs to the reproducibililty index, and it uses a weighted average to form the
         average components.  The weights are defined as w_i = sum_{j neq i} SCC(i,j).
         '''
         rep = np.triu(np.abs(corrcoef(sources)),1).sum()/(0.5*self.K*(self.K-1))
         rWeights = np.asarray([(np.abs(corrcoef(sources)[j,:]).sum() - 1.0)/(sources.shape[0]-1) for j in range(0,sources.shape[0])])[:,np.newaxis]
         return ((rWeights*sources).sum(axis=0))/(rWeights.sum()),((mixing*rWeights.T).sum(axis=1))/(rWeights.sum()),rep
-    
+
     @log_function_call('Cleaning project')
     def clean_project(self):
         '''
-        Removes all files in the subdirectories of the project directory, as well as the directories.  
+        Removes all files in the subdirectories of the project directory, as well as the directories.
         Subdirectories which do not exist (having not yet been created) are skipped.
         '''
         projDirectories = [self.icaDirectory,self.rabDirectory,self.alnDirectory,self.racDirectory]
@@ -341,13 +341,13 @@ class RAICAR(object):
                 print "Cleaning %s" % d
                 files = os.listdir(d)
                 for f in files:
-                    os.remove(os.path.join(d,f))  
-        
-    @log_function_call('Running K-fold ICA')    
+                    os.remove(os.path.join(d,f))
+
+    @log_function_call('Running K-fold ICA')
     def kica(self,X):
         '''
         Runs K realizations of ICA (method dictated by constructor argument icaMethod), decomposing data matrix X
-        into A*S, for sources S and mixing matrix A.  Resulting realizations are stored in a PyTable in 
+        into A*S, for sources S and mixing matrix A.  Resulting realizations are stored in a PyTable in
         the /ica directory.
         '''
         if not os.path.exists(self.icaDirectory):
@@ -365,20 +365,20 @@ class RAICAR(object):
                 print 'Running ICA realization %s' % icaFile
                 A,W,S = self.ica(X,nSources=self.nSignals,**self.icaOptions)
                 # write the results to a PyTable
-                h5Ptr = tb.openFile(icaFile,mode="w",title='ICA Realization')
-                decomps = h5Ptr.createGroup(h5Ptr.root,'decomps','ICA Decompositions')
-                h5Ptr.createArray(decomps,'sources',S,"S")
-                h5Ptr.createArray(decomps,'mixing',A,"A")
-                h5Ptr.close() 
+                h5Ptr = tb.open_file(icaFile,mode="w",title='ICA Realization')
+                decomps = h5Ptr.create_group(h5Ptr.root,'decomps','ICA Decompositions')
+                h5Ptr.create_array(decomps,'sources',S,"S")
+                h5Ptr.create_array(decomps,'mixing',A,"A")
+                h5Ptr.close()
             else:
-                print 'ICA realization %s already exists.  Skipping.' % icaFile          
-        
+                print 'ICA realization %s already exists.  Skipping.' % icaFile
+
     @log_function_call('Computing R(a,b) matrices')
     def compute_rab(self):
         '''
         Uses the current set of ICA realizations (pytabled) to compute K*(K-1)/2 cross-correlation matrices;
-        they are indexed via tuples.  R(a,b) is much smaller than the ICA realizations (all R(a,b) matrices 
-        are generally smaller than ONE realization), so R(a,b) is also retained in memory. Recomputation of 
+        they are indexed via tuples.  R(a,b) is much smaller than the ICA realizations (all R(a,b) matrices
+        are generally smaller than ONE realization), so R(a,b) is also retained in memory. Recomputation of
         the R(a,b) matrices is forced.
         '''
         if not os.path.exists(self.rabDirectory):
@@ -407,7 +407,7 @@ class RAICAR(object):
         rabPtr = open(os.path.join(self.rabDirectory,'rabmatrix.db'),'wb')
         cPickle.dump(self.RabDict,rabPtr,protocol=-1)
         rabPtr.close()
-        
+
 
     def compute_scc_histogram(self):
         '''
@@ -426,8 +426,8 @@ class RAICAR(object):
         rPDF['bin edges'] = rPDF['bin edges'][0:-1]
         rPDF['bar width'] = 0.01
         return rPDF
-    
-    @log_function_call('Computing component alignments') 
+
+    @log_function_call('Computing component alignments')
     def compute_component_alignments(self):
         '''
         Assembles the alignDict: a dictionary of tuples such that raicar component i will consist of the tuple of
@@ -435,7 +435,7 @@ class RAICAR(object):
         0, c1 for ica run 1, . . . , component cK from ica run K.
         '''
         # might not have any ica realizations computed
-        icaFiles = sorted(os.listdir(self.icaDirectory))   
+        icaFiles = sorted(os.listdir(self.icaDirectory))
         if len(icaFiles) == 0:
             raise RAICARICAException
         # may not have computed R(a,b); try the version on disk
@@ -473,8 +473,8 @@ class RAICAR(object):
         fPtr = open(os.path.join(self.alnDirectory,'alignments.db'),'wb')
         cPickle.dump(self.alignDict,fPtr,protocol=-1)
         fPtr.close()
-    
-    @log_function_call('Aligning component') 
+
+    @log_function_call('Aligning component')
     def align_component(self,k):
         '''
         Uses the alignment dictionary to assemble a single aligned component, which will be subsequently
@@ -497,7 +497,7 @@ class RAICAR(object):
         if not self.alignDict.has_key(k):
             print 'Error.  Requested component %d does not exist.' % k
             return
-        icaFiles = sorted(os.listdir(self.icaDirectory)) 
+        icaFiles = sorted(os.listdir(self.icaDirectory))
         if len(icaFiles) == 0:
             raise RAICARICAException
         print 'Aligning component %d' % k
@@ -506,7 +506,7 @@ class RAICAR(object):
         for fi in icaFiles:
             print 'Working on file %s' % fi
             i = np.int(deconstruct_file_name(fi)[1])
-            h5Ptr = tb.openFile(os.path.join(self.icaDirectory,fi),'r')
+            h5Ptr = tb.open_file(os.path.join(self.icaDirectory,fi),'r')
             sourcesToAlign.append(h5Ptr.root.decomps.sources[self.alignDict[k][i],:])  # source to fetch
             mixColsToAlign.append(h5Ptr.root.decomps.mixing[:,self.alignDict[k][i]]) # mixing element
             h5Ptr.close()
@@ -514,12 +514,12 @@ class RAICAR(object):
         alignedSources = np.vstack(sourcesToAlign)
         alignedMixing = np.vstack(mixColsToAlign).T
         fileName = os.path.join(self.alnDirectory,construct_file_name('alnRun',k,'h5'))
-        h5Ptr = tb.openFile(fileName,mode="w",title='Aligned Component')
+        h5Ptr = tb.open_file(fileName,mode="w",title='Aligned Component')
         aligned = h5Ptr.createGroup(h5Ptr.root,'aligned','Aligned Component')
-        h5Ptr.createArray(aligned,'sources',alignedSources,"S")
-        h5Ptr.createArray(aligned,'mixing',alignedMixing,"A")
+        h5Ptr.create_array(aligned,'sources',alignedSources,"S")
+        h5Ptr.create_array(aligned,'mixing',alignedMixing,"A")
         h5Ptr.close()
-        
+
     @log_function_call('Constructing RAICAR components')
     def construct_raicar_components(self):
         '''
@@ -560,17 +560,17 @@ class RAICAR(object):
         # adjust std. dev. of RAICAR sources
         self.raicarSources = standardize(self.raicarSources,stdtype='row')
         # save the result, PyTables again
-        h5Ptr = tb.openFile(os.path.join(self.racDirectory,'components.h5'),mode="w",title='RAICAR Component')
+        h5Ptr = tb.open_file(os.path.join(self.racDirectory,'components.h5'),mode="w",title='RAICAR Component')
         raicar = h5Ptr.createGroup(h5Ptr.root,'raicar','RAICAR Component')
-        h5Ptr.createArray(raicar,'sources',self.raicarSources,"S")
-        h5Ptr.createArray(raicar,'mixing',self.raicarMixing,"A")
+        h5Ptr.create_array(raicar,'sources',self.raicarSources,"S")
+        h5Ptr.create_array(raicar,'mixing',self.raicarMixing,"A")
         h5Ptr.close()
         # this can just be pickled - it's not that large
         fPtr = open(os.path.join(self.racDirectory,'reproducibility.db'),'wb')
         cPickle.dump(self.reproducibility,fPtr,protocol=-1)
         fPtr.close()
-    
-    
+
+
     def read_raicar_components(self):
         '''
         Basically just wraps the PyTables bits to load precomputed RAICAR components.  They should
@@ -582,12 +582,12 @@ class RAICAR(object):
             raise RAICARComponentException
         # file exists and presumably has something in it
         compFileName = os.path.join(self.racDirectory,'components.h5')
-        h5Ptr = tb.openFile(compFileName,mode="r")
-        sources = h5Ptr.getNode('/raicar/sources').read()
-        mixing = h5Ptr.getNode('/raicar/mixing').read()
+        h5Ptr = tb.open_file(compFileName,mode="r")
+        sources = h5Ptr.get_node('/raicar/sources').read()
+        mixing = h5Ptr.get_node('/raicar/mixing').read()
         h5Ptr.close()
         return sources,mixing
-    
+
     def read_reproducibility(self):
         '''
         Wraps the unpickling of the reproduciblity into a function; checks that the reproducibility

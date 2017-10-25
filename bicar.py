@@ -3,7 +3,7 @@ Created on June 9, 2011
 
 BICAR is a module for fusing temporal and spatial ICA data (assumed to represent different measurement modalities
 of a common source process).  This algorithm is a modified dual-RAICAR with a matching step that associates
-temporal sources with spatial loadings, using a supplied transfer function and downsampling/interpolation, 
+temporal sources with spatial loadings, using a supplied transfer function and downsampling/interpolation,
 assuming a convolutive (LTI) model.
 
 @author: Kevin S. Brown, University of Connecticut
@@ -13,27 +13,27 @@ This source code is provided under the BSD-3 license, duplicated as follows:
 Copyright (c) 2013, Kevin S. Brown
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this 
+1. Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, this 
-list of conditions and the following disclaimer in the documentation and/or other 
+2. Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
 materials provided with the distribution.
 
-3. Neither the name of the University of Connecticut  nor the names of its contributors 
-may be used to endorse or promote products derived from this software without specific 
+3. Neither the name of the University of Connecticut  nor the names of its contributors
+may be used to endorse or promote products derived from this software without specific
 prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
@@ -63,12 +63,12 @@ def binned_entropy(px):
 
 def entropy(x,bins=10):
     '''
-    Shannon entropy, in nats, of a continuous (unbinned) set of data x.  This is a very simple 
+    Shannon entropy, in nats, of a continuous (unbinned) set of data x.  This is a very simple
     (but potentially poor) estimator that comes from naive binning.
     '''
     px = histogram(x,bins,density=True)[0]
     return binned_entropy(px)
-    
+
 
 def mutual_information(x,y,bins=10):
     '''
@@ -96,11 +96,11 @@ def double_gamma(t,a1=12.0,tau1=0.5,a2=12.0,tau2=0.85,wt=0.5):
 class BICARICAException(Exception):
     def __init__(self):
         print "Number of extracted spatial sources depends on the number of temporal sources. Run temporal kica first, or supply the number of sources."
-        
+
 class BICARICATypeException(Exception):
     def __init__(self,t):
         print "Unknown ica type %s provided to kica." % t
-        
+
 class BICARMatchingException(Exception):
     def __init__(self):
         print "No temporal-spatial matching has yet been performed."
@@ -108,7 +108,7 @@ class BICARMatchingException(Exception):
 class BICARMatchingMethodException(Exception):
     def __init__(self,s):
         print "Unknown matching method %s." % s
-        
+
 class BICARBackgroundException(Exception):
     def __init__(self):
         print "No reproducibility background has been calculated."
@@ -117,32 +117,32 @@ class BICARBackgroundException(Exception):
 class BICARTransferFunction(object):
     '''Used to filter and downsample an input signal (assumed to be from temporal ICA) in order
     to match it to the loadings from spatial ICA sources.
-    
+
     Parameters:
         ------------
             irf : callable method, required
                 function giving the impulse response function that associates the datasets
-                
+
             parDict : dictionary, required
                 parameters to be supplied to the irf
-            
-            matchSamp : list, required 
+
+            matchSamp : list, required
                 a list of samples for matching the timebase of the signals from tICA and sICA
 
             dt : float, required
                 1/R, where R (Hz) is the sampling rate of the high (temporal) resolution data.
                 converts between samples and seconds
-    ''' 
+    '''
     def __init__(self,irf,parDict,matchSamp,dt):
         self.irf = irf
         self.p = parDict
         self.x = matchSamp
         self.dt = dt
-        
+
     def compute_irf(self,t):
         '''Computes the supplied irf, passing through the parameters supplied to the constructor.'''
         return self.irf(t,**self.p)
-    
+
     def filter(self,s):
         '''Accepts an input source - assumed to be from temporal ICA - and filters it using the
         supplied irf. Returns the convolved signal.'''
@@ -150,14 +150,14 @@ class BICARTransferFunction(object):
         maxt = 0.25*self.dt*self.x[-1]
         t = np.arange(0,maxt,self.dt)
         return sp.convolve(self.compute_irf(t),s,mode='full')[0:len(s)]
-    
+
     def resample(self,s):
         return sp.interp(self.x,xrange(0,len(s)),s)
-    
+
     def transform(self,s):
         '''Shorthand function that does s -> filter -> resample -> b.'''
         return self.resample(self.filter(s))
-        
+
 
 class BICAR(RAICAR):
     def __init__(self,projDirectory,nSignals=None,K=30,avgMethod='weighted',canonSigns=True,icaMethod=None,icaOptions=None,reportLevel=2):
@@ -181,16 +181,16 @@ class BICAR(RAICAR):
         #    matchDict[n] = [(i1,j1,c1),...,(iK,jK,cK)] means for realization n, tICA comp i1 matches sICA comp j1, etc.,
         # and ci records the absolute correlation for the match
         self.matchDict = dict()
-        # spatialAlignDict[j] = [d0,d1,...,dK-1], constructed using alignDict and the matchDict 
+        # spatialAlignDict[j] = [d0,d1,...,dK-1], constructed using alignDict and the matchDict
         self.spatialAlignDict = {}
         # will hold the eventual bicar sources/mixing matrices
         self.temporalSources = None
         self.temporalMixing = None
         self.spatialSources = None
         self.spatialMixing = None
-    
-    
-    
+
+
+
     def spatial_alignment(self):
         '''
         Uses the corrected temporal alignment to obtain the corresponding alignment of spatial sources (which
@@ -218,11 +218,11 @@ class BICAR(RAICAR):
         alnPtr = open(os.path.join(self.alnDirectory,'spatial_alignments.db'),'wb')
         cPickle.dump(self.spatialAlignDict,alnPtr,protocol=-1)
         alnPtr.close()
-        
-            
+
+
     def clean_project(self):
         '''
-        Removes all files in the subdirectories of the project directory, as well as the directories.  
+        Removes all files in the subdirectories of the project directory, as well as the directories.
         Subdirectories which do not exist (having not yet been created) are skipped.
         '''
         projDirectories = [self.temporalDirectory,self.spatialDirectory,self.rabDirectory,self.alnDirectory,self.racDirectory]
@@ -236,14 +236,14 @@ class BICAR(RAICAR):
                 files = os.listdir(d)
                 for f in files:
                     os.remove(os.path.join(d,f))
-                    
-    
+
+
     def kica(self,X,icaType='temporal'):
         '''
         Accepts a data matrix X:
             X : nX x tX, tX >> nX  (icaType = 'temporal')
             Y : tY x nY, tY << nY  (icaType = 'spatial')
-        and runs K ica realizations on X.  The number of requested sources for spatial ICA is set by the number 
+        and runs K ica realizations on X.  The number of requested sources for spatial ICA is set by the number
         requested from temporal ICA (hence tICA must be run first).  Note that Y needs to be properly transposed (row dim << col dim)
         on input.
         '''
@@ -269,19 +269,19 @@ class BICAR(RAICAR):
                     print 'Running %s ICA realization %s' % (icaType,f)
                 A,W,S = self.ica(X,nSources=self.nSignals,**self.icaOptions)
                 # write the results to hdf5
-                h5Ptr = tb.openFile(f,mode="w",title='ICA Realization')
-                decomp = h5Ptr.createGroup(h5Ptr.root,'decomps','ICA Decomposition')
-                h5Ptr.createArray(decomp,'sources',S,"S")
-                h5Ptr.createArray(decomp,'mixing',A,"A")
+                h5Ptr = tb.open_file(f,mode="w",title='ICA Realization')
+                decomp = h5Ptr.create_group(h5Ptr.root,'decomps','ICA Decomposition')
+                h5Ptr.create_array(decomp,'sources',S,"S")
+                h5Ptr.create_array(decomp,'mixing',A,"A")
                 h5Ptr.close()
             else:
                 if self.reportLevel > 0:
                     print 'ICA realization %s already exists.  Skipping.' % f
-                
+
 
     def similarity_random(self,tftPtr,sfiPtr,transfer):
         '''
-        Purely uniform random similarities transfer function is completely ignored. 
+        Purely uniform random similarities transfer function is completely ignored.
         Useful for tests of statistical significance.
         '''
         return np.random.rand(self.nSignals,self.nSignals)
@@ -301,7 +301,7 @@ class BICAR(RAICAR):
                 Sij[k,l] = np.abs(pearsonr(b,bi[:,l])[0])
         return Sij
 
-    
+
     def similarity_pwtpearson(self,tfiPtr,sfiPtr,transfer):
         '''
         Measures similarity via absolute pearson correlation, weighted
@@ -382,7 +382,7 @@ class BICAR(RAICAR):
                 Sij[k,l] = np.abs(r)*(1.0-p)
         return Sij
 
-    
+
     def similarity_mi(self,tfiPtr,sfiPtr,transfer):
         '''
         Measures similarity via the mutual information between the temporal
@@ -463,8 +463,8 @@ class BICAR(RAICAR):
             tfiPtr.close()
             sfiPtr.close()
         return matchDict
-    
-                
+
+
     def match_sources(self,similarity,transfer,degenerate=False):
         '''
         A dispatcher method to match temporal and spatial sources.  Basically just extra wrapping, but
@@ -490,18 +490,18 @@ class BICAR(RAICAR):
         matPtr = open(os.path.join(self.matDirectory,'matching.db'),'wb')
         cPickle.dump(self.matchDict,matPtr,protocol=-1)
         matPtr.close()
-        
-    
+
+
     def compute_rab(self):
         '''
         Uses the current set of ICA realizations (pytabled) to compute K*(K-1)/2 cross-correlation matrices;
-        they are indexed via tuples.  R(a,b) is much smaller than the ICA realizations (all R(a,b) matrices 
-        are generally smaller than ONE realization), so R(a,b) is also retained in memory. Recomputation of 
+        they are indexed via tuples.  R(a,b) is much smaller than the ICA realizations (all R(a,b) matrices
+        are generally smaller than ONE realization), so R(a,b) is also retained in memory. Recomputation of
         the R(a,b) matrices is forced.  R(a,b) matrices from paired temporal/spatial sources are combined
         using:
             R(a,b) = 0.5*R_t(a,b) + 0.5*R_s(a,b)
         This assumes the number of samples (timepoints in the tICA sources and locations in the sICA sources)
-        in the two datasets are comparable; otherwise a weighted sum should be used.         
+        in the two datasets are comparable; otherwise a weighted sum should be used.
         '''
         if not os.path.exists(self.rabDirectory):
             try:
@@ -517,8 +517,8 @@ class BICAR(RAICAR):
                 raise BICARMatchingException
         if self.nSignals is None:
             # need the number of signals for matrix sizing, available from the matching dictionary
-            self.nSignals = len(zip(*self.matchDict[0])[0])       
-        # temporal files to loop over 
+            self.nSignals = len(zip(*self.matchDict[0])[0])
+        # temporal files to loop over
         tICAFiles = sorted(os.listdir(self.temporalDirectory))
         if len(tICAFiles) == 0:
             raise RAICARICAException
@@ -550,7 +550,7 @@ class BICAR(RAICAR):
                             tsj = tjPtr.root.decomps.sources[m,:]
                             self.RabDict[(i,j)][l,m] += 0.5*(np.abs((1.0/len(tsi))*np.dot(tsi,tsj)) - tsi.mean()*tsj.mean())
                             # corresponding spatial cross correlation
-                            lmatch = self.matchDict[i][l][0]  
+                            lmatch = self.matchDict[i][l][0]
                             mmatch = self.matchDict[j][m][0]
                             ssi = siPtr.root.decomps.sources[lmatch,:]
                             ssj = sjPtr.root.decomps.sources[mmatch,:]
@@ -563,19 +563,19 @@ class BICAR(RAICAR):
         rabPtr = open(os.path.join(self.rabDirectory,'rabmatrix.db'),'wb')
         cPickle.dump(self.RabDict,rabPtr,protocol=-1)
         rabPtr.close()
-        
+
 
 
     def compute_component_alignments(self):
         '''
         Assembles the alignDict: a dictionary of tuples such that bicar component i will consist of the tuple of
-        ICA components in alignDict[i] = (c0,..,cK), along with their spatial matches (from the matchDict); bicar 
-        temporal component i will consist of component c0 from ICA run 0, c1 for ICA run 1, . . . , component cK 
-        from ICA run K.  The corresponding bicar spatial components will be subsequently assigned via the matching 
+        ICA components in alignDict[i] = (c0,..,cK), along with their spatial matches (from the matchDict); bicar
+        temporal component i will consist of component c0 from ICA run 0, c1 for ICA run 1, . . . , component cK
+        from ICA run K.  The corresponding bicar spatial components will be subsequently assigned via the matching
         dictionary.
         '''
         # might not have any ica realizations computed
-        tICAFiles = sorted(os.listdir(self.temporalDirectory))   
+        tICAFiles = sorted(os.listdir(self.temporalDirectory))
         if len(tICAFiles) == 0:
             raise RAICARICAException
         sICAFiles = sorted(os.listdir(self.spatialDirectory))
@@ -617,11 +617,11 @@ class BICAR(RAICAR):
         fPtr = open(os.path.join(self.alnDirectory,'alignments.db'),'wb')
         cPickle.dump(self.alignDict,fPtr,protocol=-1)
         fPtr.close()
-        
+
 
     def align_component(self,k):
         '''
-        Uses the calculated alignment dictionaries (spatial and temporal) to assemble pairs of a single 
+        Uses the calculated alignment dictionaries (spatial and temporal) to assemble pairs of a single
         aligned component, which will be subsequently averaged to make a bicar component.
         '''
         if len(self.alignDict) == 0:
@@ -647,7 +647,7 @@ class BICAR(RAICAR):
                 print 'Error.  Requested component %d does not exist.' % k
             return
         # temporal alignment
-        tICAFiles = sorted(os.listdir(self.temporalDirectory)) 
+        tICAFiles = sorted(os.listdir(self.temporalDirectory))
         sICAFiles = sorted(os.listdir(self.spatialDirectory))
         if len(tICAFiles) == 0 or len(sICAFiles) == 0:
             raise RAICARICAException
@@ -659,7 +659,7 @@ class BICAR(RAICAR):
             if self.reportLevel > 1:
                 print 'Working on file %s' % fi
             i = np.int(deconstruct_file_name(fi)[1])
-            h5Ptr = tb.openFile(os.path.join(self.temporalDirectory,fi),'r')
+            h5Ptr = tb.open_file(os.path.join(self.temporalDirectory,fi),'r')
             sourcesToAlign.append(h5Ptr.root.decomps.sources[self.alignDict[k][i],:])  # source to fetch
             mixColsToAlign.append(h5Ptr.root.decomps.mixing[:,self.alignDict[k][i]]) # mixing element
             h5Ptr.close()
@@ -667,10 +667,10 @@ class BICAR(RAICAR):
         alignedSources = np.vstack(sourcesToAlign)
         alignedMixing = np.vstack(mixColsToAlign).T
         fileName = os.path.join(self.alnDirectory,construct_file_name('alnRun_t',k,'h5'))
-        h5Ptr = tb.openFile(fileName,mode="w",title='Aligned Component')
-        aligned = h5Ptr.createGroup(h5Ptr.root,'aligned','Aligned Component')
-        h5Ptr.createArray(aligned,'sources',alignedSources,"S")
-        h5Ptr.createArray(aligned,'mixing',alignedMixing,"A")
+        h5Ptr = tb.open_file(fileName,mode="w",title='Aligned Component')
+        aligned = h5Ptr.create_group(h5Ptr.root,'aligned','Aligned Component')
+        h5Ptr.create_array(aligned,'sources',alignedSources,"S")
+        h5Ptr.create_array(aligned,'mixing',alignedMixing,"A")
         h5Ptr.close()
         # repeat for the spatial source
         if self.reportLevel > 0:
@@ -681,7 +681,7 @@ class BICAR(RAICAR):
             if self.reportLevel > 1:
                 print 'Working on file %s' % fi
             i = np.int(deconstruct_file_name(fi)[1])
-            h5Ptr = tb.openFile(os.path.join(self.spatialDirectory,fi),'r')
+            h5Ptr = tb.open_file(os.path.join(self.spatialDirectory,fi),'r')
             sourcesToAlign.append(h5Ptr.root.decomps.sources[self.spatialAlignDict[k][i],:])  # source to fetch
             mixColsToAlign.append(h5Ptr.root.decomps.mixing[:,self.spatialAlignDict[k][i]]) # mixing element
             h5Ptr.close()
@@ -689,17 +689,17 @@ class BICAR(RAICAR):
         alignedSources = np.vstack(sourcesToAlign)
         alignedMixing = np.vstack(mixColsToAlign).T
         fileName = os.path.join(self.alnDirectory,construct_file_name('alnRun_s',k,'h5'))
-        h5Ptr = tb.openFile(fileName,mode="w",title='Aligned Component')
-        aligned = h5Ptr.createGroup(h5Ptr.root,'aligned','Aligned Component')
-        h5Ptr.createArray(aligned,'sources',alignedSources,"S")
-        h5Ptr.createArray(aligned,'mixing',alignedMixing,"A")
+        h5Ptr = tb.open_file(fileName,mode="w",title='Aligned Component')
+        aligned = h5Ptr.create_group(h5Ptr.root,'aligned','Aligned Component')
+        h5Ptr.create_array(aligned,'sources',alignedSources,"S")
+        h5Ptr.create_array(aligned,'mixing',alignedMixing,"A")
         h5Ptr.close()
-        
-    
+
+
     def construct_bicar_components(self):
         '''
-        Averages the aligned ICA runs (both temporal and spatial) and calculates the reproducibility 
-        for each component.  avgMethod and canonSigns controls the method of component formation and 
+        Averages the aligned ICA runs (both temporal and spatial) and calculates the reproducibility
+        for each component.  avgMethod and canonSigns controls the method of component formation and
         reproducibility indices calculated.
         '''
         if not os.path.exists(self.racDirectory):
@@ -739,10 +739,10 @@ class BICAR(RAICAR):
         # adjust std. dev. of RAICAR sources
         self.temporalSources = standardize(self.temporalSources,stdtype='row')
         # save the result, PyTables again
-        h5Ptr = tb.openFile(os.path.join(self.racDirectory,'temporal_components.h5'),mode="w",title='RAICAR Component')
-        bicar = h5Ptr.createGroup(h5Ptr.root,'bicar','RAICAR Component')
-        h5Ptr.createArray(bicar,'sources',self.temporalSources,"S")
-        h5Ptr.createArray(bicar,'mixing',self.temporalMixing,"A")
+        h5Ptr = tb.open_file(os.path.join(self.racDirectory,'temporal_components.h5'),mode="w",title='RAICAR Component')
+        bicar = h5Ptr.create_group(h5Ptr.root,'bicar','RAICAR Component')
+        h5Ptr.create_array(bicar,'sources',self.temporalSources,"S")
+        h5Ptr.create_array(bicar,'mixing',self.temporalMixing,"A")
         h5Ptr.close()
         # repeat the whole thing for the spatial sources
         raicarSources = []
@@ -769,21 +769,21 @@ class BICAR(RAICAR):
         for i in range(0,len(self.reproducibility)):
             self.reproducibility[i] = 0.5*self.reproducibility[i] + 0.5*repro[i]
         # save the result, PyTables again
-        h5Ptr = tb.openFile(os.path.join(self.racDirectory,'spatial_components.h5'),mode="w",title='RAICAR Component')
-        bicar = h5Ptr.createGroup(h5Ptr.root,'bicar','RAICAR Component')
-        h5Ptr.createArray(bicar,'sources',self.spatialSources,"S")
-        h5Ptr.createArray(bicar,'mixing',self.spatialMixing,"A")
+        h5Ptr = tb.open_file(os.path.join(self.racDirectory,'spatial_components.h5'),mode="w",title='RAICAR Component')
+        bicar = h5Ptr.create_group(h5Ptr.root,'bicar','RAICAR Component')
+        h5Ptr.create_array(bicar,'sources',self.spatialSources,"S")
+        h5Ptr.create_array(bicar,'mixing',self.spatialMixing,"A")
         h5Ptr.close()
         # this can just be pickled - it's not that large
         fPtr = open(os.path.join(self.racDirectory,'reproducibility.db'),'wb')
         cPickle.dump(self.reproducibility,fPtr,protocol=-1)
         fPtr.close()
-    
-    
+
+
     def compute_raicar_distribution(self):
         '''
-        Calcluates the RAICAR distribution (histogram of rz-rz absolute cross correlation coefficients).  
-        This can be used to set a significance bound on the BICAR component reproducibility.  If this 
+        Calcluates the RAICAR distribution (histogram of rz-rz absolute cross correlation coefficients).
+        This can be used to set a significance bound on the BICAR component reproducibility.  If this
         distribution already exists, the pickled value is read and used to perform the calculations.
         '''
         raicarDist = list()
@@ -817,8 +817,8 @@ class BICAR(RAICAR):
         rPtr = open(os.path.join(self.bkgDirectory,'raicardist.db'),'wb')
         cPickle.dump(raicarDist,rPtr,protocol=-1)
         rPtr.close()
-        
-    
+
+
     def compute_background(self,method="normal",w=0.5,Rstar=1.0,nSamples=1000):
         '''
         Uses the computed RAICAR distribution (dist. of absolute rz-rz cross-correlation coefficients) for the
@@ -849,8 +849,8 @@ class BICAR(RAICAR):
             return Rc
         else:
             return 0.0,0.0
-            
-    
+
+
     def read_bicar_components(self,cType='temporal'):
         '''
         Basically just wraps the PyTables bits to load precomputed BICAR components.  They should
@@ -862,13 +862,13 @@ class BICAR(RAICAR):
             raise RAICARComponentException
         # file exists and presumably has something in it
         compFileName = os.path.join(self.racDirectory,cType+'_components.h5')
-        h5Ptr = tb.openFile(compFileName,mode="r")
-        sources = h5Ptr.getNode('/bicar/sources').read()
-        mixing = h5Ptr.getNode('/bicar/mixing').read()
+        h5Ptr = tb.open_file(compFileName,mode="r")
+        sources = h5Ptr.get_node('/bicar/sources').read()
+        mixing = h5Ptr.get_node('/bicar/mixing').read()
         h5Ptr.close()
         return sources,mixing
 
-    
+
     def runall(self,X,YT,transfer,similarity='pweighted',degenerate=False):
         '''
         Wrapper to run BICAR from start to finish.  Does not compute the reproducibility
