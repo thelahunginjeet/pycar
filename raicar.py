@@ -390,8 +390,8 @@ class RAICAR(object):
         if len(icaFiles) == 0:
             raise RAICARICAException
         for fi in icaFiles:
-            fiPtr = tb.openFile(os.path.join(self.icaDirectory,fi),'r')
-            si = fiPtr.getNode('/decomps/sources').read()
+            fiPtr = tb.open_file(os.path.join(self.icaDirectory,fi),'r')
+            si = fiPtr.get_node('/decomps/sources').read()
             fiPtr.close()
             i = np.int(deconstruct_file_name(fi)[1])
             print 'Working on R(%d,b)'%i
@@ -399,8 +399,8 @@ class RAICAR(object):
                 j = np.int(deconstruct_file_name(fj)[1])
                 if j > i:
                     # sources assumed to have unit std. dev. but nonzero mean - will behave badly if not!
-                    fjPtr = tb.openFile(os.path.join(self.icaDirectory,fj),'r')
-                    sj = fjPtr.getNode('/decomps/sources').read()
+                    fjPtr = tb.open_file(os.path.join(self.icaDirectory,fj),'r')
+                    sj = fjPtr.get_node('/decomps/sources').read()
                     fjPtr.close()
                     self.RabDict[(i,j)] = np.abs(corrmatrix(si,sj))
         # pickle the result
@@ -455,8 +455,8 @@ class RAICAR(object):
         gc.collect()
         # need to know how many components to calculate (if any runs exist,
         #    the zeroth one will)
-        f0Ptr = tb.openFile(os.path.join(self.icaDirectory,'icaRun_0.h5'),'r')
-        s0 = f0Ptr.getNode('/decomps/sources').read()
+        f0Ptr = tb.open_file(os.path.join(self.icaDirectory,'icaRun_0.h5'),'r')
+        s0 = f0Ptr.get_node('/decomps/sources').read()
         f0Ptr.close()
         nComp = s0.shape[0]
         del s0
@@ -541,10 +541,10 @@ class RAICAR(object):
         raicarMixing = []
         repro = []
         for f in alnFiles:
-            print 'Constructing raicar component from file %s' % f
-            fPtr = tb.openFile(f,'r')
-            sc = fPtr.getNode('/aligned/sources').read()
-            ac = fPtr.getNode('/aligned/mixing').read()
+            print 'Constructing raicar comfponent from file %s' % f
+            fPtr = tb.open_file(f,'r')
+            sc = fPtr.get_node('/aligned/sources').read()
+            ac = fPtr.get_node('/aligned/mixing').read()
             fPtr.close()
             if self.canonSigns:
                 sc,ac = self.canonicalize_signs(sc,ac)
